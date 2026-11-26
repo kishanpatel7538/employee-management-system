@@ -1,0 +1,585 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Employee Management Dashboard</title>
+
+    <!-- Bootstrap -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+        rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+
+        body {
+            background: #f4f6f9;
+            font-family: Arial, sans-serif;
+        }
+
+        .sidebar {
+            min-height: 100vh;
+            background: #212529;
+            color: white;
+        }
+
+        .sidebar h4 {
+            font-weight: bold;
+            padding: 15px 5px;
+        }
+
+        .sidebar a {
+            display: block;
+            color: #d1d5db;
+            text-decoration: none;
+            padding: 13px;
+            border-radius: 6px;
+            margin-bottom: 5px;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background: #343a40;
+            color: white;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .stat-card {
+            border: none;
+            border-radius: 12px;
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .stat-icon {
+            font-size: 28px;
+            color: #0d6efd;
+        }
+
+        .stat-value {
+            font-size: 26px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .content-card {
+            border: none;
+            border-radius: 12px;
+        }
+
+        .chart-container {
+            max-width: 450px;
+            margin: auto;
+        }
+
+        @media (max-width: 768px) {
+
+            .sidebar {
+                min-height: auto;
+            }
+
+            .main-content {
+                padding: 15px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="container-fluid">
+
+    <div class="row">
+
+        <!-- SIDEBAR -->
+
+        <div class="col-md-2 sidebar p-3">
+
+            <h4>
+                <i class="bi bi-building"></i>
+                EMS Admin
+            </h4>
+
+            <hr>
+
+            <a href="{{ url_for('auth.dashboard') }}"
+               class="active">
+
+                <i class="bi bi-speedometer2"></i>
+                Dashboard
+
+            </a>
+
+            {% if user.role == 'admin' %}
+
+            <a href="{{ url_for('employees.list_employees') }}">
+
+                <i class="bi bi-people"></i>
+                Employees
+
+            </a>
+
+            {% endif %}
+
+            <a href="{{ url_for('hr.attendance') }}"><i class="bi bi-calendar-check"></i> Attendance</a>
+            <a href="{{ url_for('hr.leaves') }}"><i class="bi bi-calendar2-week"></i> Leave Management</a>
+            {% if user.role == 'admin' %}
+            <a href="{{ url_for('hr.payroll') }}"><i class="bi bi-cash-stack"></i> Payroll</a>
+            <a href="{{ url_for('hr.account_linking') }}"><i class="bi bi-person-check"></i> Link Employee Accounts</a>
+            <a href="{{ url_for('hr.employee_report') }}"><i class="bi bi-file-earmark-spreadsheet"></i> Employee Report (CSV)</a>
+            {% endif %}
+
+            <div class="mt-4">
+
+                <form method="POST"
+                      action="{{ url_for('auth.logout') }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    <button type="submit"
+                            class="btn btn-danger w-100">
+
+                        <i class="bi bi-box-arrow-right"></i>
+                        Logout
+
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+
+        <!-- MAIN CONTENT -->
+
+        <div class="col-md-10 main-content">
+
+            <!-- HEADER -->
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+
+                <div>
+
+                    <h2>Dashboard</h2>
+
+                    <p class="text-muted">
+                        Welcome back, {{ user.username }}
+                    </p>
+
+                </div>
+
+                <div>
+
+                    <span class="badge bg-primary p-2">
+
+                        {{ user.role|capitalize }}
+
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- FLASH MESSAGES -->
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+
+                {% for category, message in messages %}
+
+                    <div class="alert alert-{{ category }} alert-dismissible fade show">
+
+                        {{ message }}
+
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="alert">
+                        </button>
+
+                    </div>
+
+                {% endfor %}
+
+            {% endwith %}
+
+
+            {% if user.role == 'admin' %}
+
+
+            <!-- STATISTICS CARDS -->
+
+            <div class="row g-4">
+
+                <!-- Total Employees -->
+
+                <div class="col-md-3">
+
+                    <div class="card stat-card shadow-sm p-3">
+
+                        <i class="bi bi-people stat-icon"></i>
+
+                        <h6 class="text-muted mt-3">
+                            Total Employees
+                        </h6>
+
+                        <div class="stat-value">
+                            {{ total_employees }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Departments -->
+
+                <div class="col-md-3">
+
+                    <div class="card stat-card shadow-sm p-3">
+
+                        <i class="bi bi-building stat-icon"></i>
+
+                        <h6 class="text-muted mt-3">
+                            Departments
+                        </h6>
+
+                        <div class="stat-value">
+                            {{ total_departments }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Average Salary -->
+
+                <div class="col-md-3">
+
+                    <div class="card stat-card shadow-sm p-3">
+
+                        <i class="bi bi-wallet2 stat-icon"></i>
+
+                        <h6 class="text-muted mt-3">
+                            Average Salary
+                        </h6>
+
+                        <div class="stat-value">
+
+                            ₹{{ "{:,.2f}".format(average_salary) }}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Total Payroll -->
+
+                <div class="col-md-3">
+
+                    <div class="card stat-card shadow-sm p-3">
+
+                        <i class="bi bi-cash-stack stat-icon"></i>
+
+                        <h6 class="text-muted mt-3">
+                            Total Payroll
+                        </h6>
+
+                        <div class="stat-value">
+
+                            ₹{{ "{:,.2f}".format(total_payroll) }}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- DEPARTMENT CHART -->
+
+            <div class="card content-card shadow-sm mt-4 p-4">
+
+                <h5 class="mb-4">
+
+                    <i class="bi bi-pie-chart"></i>
+                    Employees by Department
+
+                </h5>
+
+                {% if department_labels %}
+
+                    <div class="chart-container">
+
+                        <canvas
+    id="departmentChart"
+    data-labels='{{ department_labels | tojson | forceescape }}'
+    data-counts='{{ department_counts | tojson | forceescape }}'>
+</canvas>
+
+                    </div>
+
+                {% else %}
+
+                    <p class="text-muted text-center">
+                        No department data available yet.
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- RECENT EMPLOYEES -->
+
+            <div class="card content-card shadow-sm mt-4 p-4">
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+
+                    <h5>
+                        <i class="bi bi-clock-history"></i>
+                        Recently Added Employees
+                    </h5>
+
+                    <a href="{{ url_for('employees.list_employees') }}"
+                       class="btn btn-primary btn-sm">
+
+                        View All
+
+                    </a>
+
+                </div>
+
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle">
+
+                        <thead class="table-dark">
+
+                            <tr>
+
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Department</th>
+                                <th>Designation</th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            {% for employee in recent_employees %}
+
+                            <tr>
+
+                                <td>
+                                    {{ employee.id }}
+                                </td>
+
+                                <td>
+
+                                    {{ employee.first_name }}
+                                    {{ employee.last_name }}
+
+                                </td>
+
+                                <td>
+                                    {{ employee.email }}
+                                </td>
+
+                                <td>
+                                    {{ employee.department or '-' }}
+                                </td>
+
+                                <td>
+                                    {{ employee.designation or '-' }}
+                                </td>
+
+                            </tr>
+
+                            {% else %}
+
+                            <tr>
+
+                                <td colspan="5"
+                                    class="text-center text-muted">
+
+                                    No employees available.
+
+                                </td>
+
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+            {% else %}
+
+
+            <!-- EMPLOYEE DASHBOARD -->
+
+            <div class="card shadow-sm content-card p-4 mt-4">
+
+                <h4>
+                    Welcome, {{ user.username }}
+                </h4>
+
+                <p class="text-muted">
+                    You are logged in as an employee.
+                </p>
+
+                {% if user.employee %}
+
+                    <hr>
+
+                    <h5>My Employee Profile</h5>
+
+                    <p>
+                        <strong>Name:</strong>
+                        {{ user.employee.first_name }}
+                        {{ user.employee.last_name }}
+                    </p>
+
+                    <p>
+                        <strong>Department:</strong>
+                        {{ user.employee.department or '-' }}
+                    </p>
+
+                    <p>
+                        <strong>Designation:</strong>
+                        {{ user.employee.designation or '-' }}
+                    </p>
+
+                {% else %}
+
+                    <p>
+                        Your employee profile has not been linked yet.
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- BOOTSTRAP JAVASCRIPT -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+</script>
+
+
+<!-- DEPARTMENT CHART -->
+
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const chartElement = document.getElementById("departmentChart");
+
+    // Stop if chart element doesn't exist
+    if (!chartElement) {
+        return;
+    }
+
+    // Get data from HTML attributes
+    const departmentLabels = JSON.parse(
+        chartElement.dataset.labels
+    );
+
+    const departmentCounts = JSON.parse(
+        chartElement.dataset.counts
+    );
+
+    // Create department chart
+    new Chart(chartElement, {
+
+        type: "doughnut",
+
+        data: {
+
+            labels: departmentLabels,
+
+            datasets: [{
+                label: "Employees",
+                data: departmentCounts,
+                borderWidth: 2
+            }]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: true,
+
+            plugins: {
+
+                legend: {
+                    position: "bottom"
+                }
+
+            }
+
+        }
+
+    });
+
+});
+
+
+</script>
+
+
+</body>
+</html>

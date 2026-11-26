@@ -1,0 +1,8 @@
+{% extends "hr/base_employee.html" %}
+{% block title %}My Payroll{% endblock %}
+{% block content %}
+<h2 class="mb-4">My Payroll</h2>
+<div class="card shadow-sm border-0"><div class="card-body"><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Month</th><th>Basic</th><th>Allowances</th><th>Deductions</th><th>Net salary</th></tr></thead><tbody>
+{% for p in records %}<tr><td>{{ p.pay_month }}</td><td>₹{{ "{:,.2f}".format(p.basic_salary) }}</td><td>₹{{ "{:,.2f}".format(p.allowances) }}</td><td>₹{{ "{:,.2f}".format(p.deductions) }}</td><td><strong>₹{{ "{:,.2f}".format(p.net_salary) }}</strong></td></tr>{% else %}<tr><td colspan="5" class="text-center text-muted">No payroll records have been generated for your employee account.</td></tr>{% endfor %}
+</tbody></table></div></div></div>
+{% endblock %}

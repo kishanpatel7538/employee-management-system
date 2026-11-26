@@ -1,0 +1,185 @@
+
+{% extends "hr/base.html" %}
+
+{% block title %}Employee Account Linking{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <h2 class="mb-3">Link employee login accounts</h2>
+
+    <p class="text-muted">
+        Link an existing employee record to an employee-role login.
+        Confirm the identity before linking.
+    </p>
+
+    <!-- ACCOUNT LINKING FORM -->
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+
+            <form method="POST"
+                  action="{{ url_for('hr.account_linking') }}"
+                  class="row g-3">
+
+                <input type="hidden"
+                       name="csrf_token"
+                       value="{{ csrf_token() }}">
+
+                <!-- EMPLOYEE RECORD -->
+
+                <div class="col-md-5">
+
+                    <label class="form-label" for="employee_id">
+                        Employee record
+                    </label>
+
+                    <select class="form-select"
+                            id="employee_id"
+                            name="employee_id"
+                            required>
+
+                        <option value="">Choose employee</option>
+
+                        {% for e in unlinked_employees %}
+
+                            <option value="{{ e.id }}">
+                                {{ e.first_name }} {{ e.last_name }}
+                                — {{ e.email }} (#{{ e.id }})
+                            </option>
+
+                        {% else %}
+
+                            <option value="" disabled>
+                                No unlinked employees available
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+                <!-- EMPLOYEE LOGIN ACCOUNT -->
+
+                <div class="col-md-5">
+
+                    <label class="form-label" for="user_id">
+                        Employee login account
+                    </label>
+
+                    <select class="form-select"
+                            id="user_id"
+                            name="user_id"
+                            required>
+
+                        <option value="">Choose login account</option>
+
+                        {% for u in unlinked_users %}
+
+                            <option value="{{ u.id }}">
+                                {{ u.username }} — {{ u.email }}
+                                (#{{ u.id }})
+                            </option>
+
+                        {% else %}
+
+                            <option value="" disabled>
+                                No available employee login accounts
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+                <!-- LINK BUTTON -->
+
+                <div class="col-md-2 d-flex align-items-end">
+
+                    <button type="submit"
+                            class="btn btn-primary w-100">
+                        Link account
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+
+    <!-- CURRENTLY LINKED ACCOUNTS -->
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-body">
+
+            <h5 class="mb-3">
+                Currently linked accounts
+            </h5>
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Employee email</th>
+                            <th>Login email</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for e in linked_employees %}
+
+                            <tr>
+
+                                <td>
+                                    {{ e.first_name }}
+                                    {{ e.last_name }}
+                                </td>
+
+                                <td>
+                                    {{ e.email }}
+                                </td>
+
+                                <td>
+                                    {% if e.user %}
+                                        {{ e.user.email }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+
+                            </tr>
+
+                        {% else %}
+
+                            <tr>
+                                <td colspan="3"
+                                    class="text-center text-muted">
+                                    No linked accounts yet.
+                                </td>
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
