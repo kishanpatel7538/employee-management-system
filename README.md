@@ -1,54 +1,75 @@
-## 🔗 Project Links
-[Open Live Application](https://employee-management-system-mjfz.onrender.com)
-
 # Employee Management System (HRMS)
 
-A Flask-based Employee Management System with role-based access for administrators and employees. It uses PostgreSQL for persistent storage and Docker Compose to run the web application and database.
+A full-stack Employee Management System built using **Python, Flask, and PostgreSQL**, designed to simplify employee administration and HR operations through role-based access.
 
-## Features
+The application provides separate interfaces for administrators and employees, supporting employee management, attendance tracking, leave management, payroll records, and CSV reporting.
 
-### Authentication and access control
+## 🔗 Project Links
+
+- **Live Application:** [Open Employee Management System](https://employee-management-system-mjfz.onrender.com)
+- **GitHub Repository:** [View Source Code](https://github.com/kishanpatel7538/employee-management-system)
+
+## 🚀 Key Features
+
+### 1. Authentication and Access Control
+
 - User registration and login.
 - Secure password hashing using Werkzeug.
-- Flask-Login session management.
-- Role-based access for administrators and employees.
+- Session management using Flask-Login.
+- Role-based authorization for Admin and Employee accounts.
 - CSRF protection using Flask-WTF.
 
-### Employee management
-- Create, view, search and filter employee records.
-- Update and delete employee records.
-- Manage department, designation, salary and joining date.
-- Link employee records to employee login accounts.
+### 2. Employee Management
 
-### HR operations
-- Record and review attendance.
-- Submit and approve or reject leave requests.
+- Add, view, update, and delete employee records.
+- Search and filter employees.
+- Manage employee departments and designations.
+- Maintain salary and joining-date information.
+- Link employee profiles with login accounts.
+
+### 3. HR Management
+
+- Record and manage employee attendance.
+- Submit employee leave applications.
+- Approve or reject leave requests.
 - Generate monthly payroll records.
-- Employee self-service dashboard.
-- View personal profile and payroll information.
+- Provide employee self-service functionality.
 
-### Reports
+### 4. Employee Self-Service
+
+- Employee dashboard.
+- View personal profile information.
+- Access payroll information.
+- Submit leave requests.
+- View attendance information.
+
+### 5. Reports and Data Export
+
 - Export employee records to CSV.
 - Export attendance records to CSV.
 - Export payroll records to CSV.
 
-## Technology Stack
+## 🛠️ Technology Stack
 
-| Component | Technology |
-|---|---|
-| Backend | Python, Flask |
-| Database | PostgreSQL |
-| ORM | Flask-SQLAlchemy |
-| Authentication | Flask-Login |
-| Security | Flask-WTF, Werkzeug |
-| Database driver | Psycopg 3 |
-| Containerization | Docker, Docker Compose |
-| Frontend | HTML, CSS, JavaScript, Bootstrap (where used in templates) |
+| Category             | Technologies                                  |
+| -------------------- | --------------------------------------------- |
+| Programming Language | Python                                        |
+| Backend Framework    | Flask                                         |
+| Database             | PostgreSQL                                    |
+| ORM                  | Flask-SQLAlchemy                              |
+| Authentication       | Flask-Login                                   |
+| Security             | Werkzeug, Flask-WTF                           |
+| Database Driver      | Psycopg 3                                     |
+| Frontend             | HTML, CSS, JavaScript, Bootstrap (where used) |
+| Containerization     | Docker, Docker Compose                        |
+| Deployment           | Render                                        |
+| Database Hosting     | Neon PostgreSQL                               |
 
-## Project Structure
+## 🏗️ Project Architecture
 
 ```text
 employee-management-system/
+│
 ├── app/
 │   ├── services/
 │   ├── templates/
@@ -58,6 +79,7 @@ employee-management-system/
 │   ├── models.py
 │   ├── routes.py
 │   └── validation.py
+│
 ├── .dockerignore
 ├── .env.example
 ├── .gitignore
@@ -68,26 +90,44 @@ employee-management-system/
 └── run.py
 ```
 
-## Installation and Setup
+## 🗄️ Database Design
+
+The application uses PostgreSQL with five primary database models.
+
+| Model        | Description                                                |
+| ------------ | ---------------------------------------------------------- |
+| User         | Stores login credentials, password hashes, and user roles. |
+| Employee     | Stores employee details and account relationships.         |
+| Attendance   | Stores employee attendance records.                        |
+| LeaveRequest | Stores leave applications and approval decisions.          |
+| Payroll      | Stores monthly payroll information.                        |
+
+**Database relationship:**
+
+The `employees.user_id` foreign key connects an employee profile to its corresponding login account in the `users` table. This relationship supports employee self-service functionality.
+
+## ⚙️ Installation and Setup
 
 ### Prerequisites
 
-- Python 3.10 or newer
-- Docker Desktop
+- Python 3.10+
+- PostgreSQL
+- Docker Desktop (for Docker deployment)
 - Git
 
-### Option 1: Run using Docker (Recommended)
+### Option 1: Run with Docker (Recommended)
 
-**1. Clone the repository**
+**Step 1: Clone the repository**
 
 ```bash
 git clone https://github.com/kishanpatel7538/employee-management-system.git
+
 cd employee-management-system
 ```
 
-**2. Create your environment file**
+**Step 2: Create the environment file**
 
-PowerShell:
+Windows PowerShell:
 
 ```powershell
 Copy-Item .env.example .env
@@ -99,114 +139,136 @@ Linux/macOS:
 cp .env.example .env
 ```
 
-Configure your own database password and Flask secret key in `.env`.
+Configure the required environment variables in `.env`.
 
-For Docker Compose, the database URL must use the Docker service hostname:
+For Docker Compose, the database connection should use the PostgreSQL service hostname:
 
 ```text
 postgresql+psycopg://postgres:<password>@db:5432/employee_db_restore
 ```
 
-Ensure the database name, username and password match the PostgreSQL environment variables.
+Make sure the database name, username, and password match your Docker Compose configuration.
 
-**3. Build and start containers**
+**Step 3: Build and start the containers**
 
 ```bash
 docker compose up -d --build
 ```
 
-**4. Access the application**
+**Step 4: Open the application**
 
-http://localhost:5000
+[http://localhost:5000](http://localhost:5000)
 
-**5. Check containers**
+**Step 5: Check container status**
 
 ```bash
 docker compose ps
 ```
 
-**6. View application logs**
+**Step 6: View application logs**
 
 ```bash
 docker compose logs -f web
 ```
 
-**7. Stop containers**
+**Step 7: Stop the containers**
 
 ```bash
 docker compose down
 ```
 
-The PostgreSQL named volume is retained when containers are stopped. Avoid `docker compose down -v` unless you intentionally want to delete the database volume and its data.
+Note: Docker's named PostgreSQL volume retains database data when containers are stopped. Avoid `docker compose down -v` unless you intentionally want to delete that data.
 
-### Option 2: Run locally using Python
+### Option 2: Run Locally Using Python
 
-**1. Create a virtual environment**
+**Step 1: Create a virtual environment**
 
 ```bash
 python -m venv venv
 ```
 
-**2. Activate it on Windows**
+**Step 2: Activate the environment**
+
+Windows PowerShell:
 
 ```powershell
 .\venv\Scripts\Activate.ps1
 ```
 
-**3. Install dependencies**
+**Step 3: Install dependencies**
 
 ```bash
 pip install -r requirements.txt
 ```
 
-**4. Configure `.env`**
+**Step 4: Configure environment variables**
 
-Use your local PostgreSQL connection details. When Flask runs directly on Windows and PostgreSQL is mapped to host port 5433, use `localhost:5433` in the database URL.
+Create a `.env` file using `.env.example` and configure your local PostgreSQL connection details.
 
-**5. Run Flask**
+If PostgreSQL is mapped to host port `5433`, use `localhost:5433` in your local database URL.
+
+**Step 5: Start the application**
 
 ```bash
 python run.py
 ```
 
-Open http://localhost:5000.
+Open:
 
-## Database Design
+[http://localhost:5000](http://localhost:5000)
 
-The application uses five primary database models:
+## 🔐 Demo Login Credentials
 
-- **User:** Login credentials, password hash and role.
-- **Employee:** Employee information and optional login account relationship.
-- **Attendance:** Employee attendance records.
-- **LeaveRequest:** Leave applications and administrative decisions.
-- **Payroll:** Monthly payroll information.
+Use the following demonstration accounts to explore the application.
 
-An employee record can exist without a login account. The optional `employees.user_id` foreign key connects an employee profile to a user login.
+### Employee Account
 
-## Security
+| Field    | Details                  |
+| -------- | ------------------------ |
+| Email    | `rahul.demo@example.com` |
+| Password | `Demo@12345`             |
+| Role     | Employee                 |
 
-- Environment variables are stored in `.env`.
-- Passwords are stored as hashes.
+### Admin Account
+
+Admin demonstration credentials should be configured separately before publication.
+
+**Note:** Demo credentials are intended only for testing. Do not publish personal administrator credentials or use demonstration accounts for real employee data.
+
+## 🔒 Security
+
+- Passwords are stored using secure password hashing.
+- Sensitive configuration is managed through environment variables.
 - CSRF protection is enabled.
-- Employee and administrator access is separated by role.
-- Database credentials and private employee information must not be committed to GitHub.
-- Use synthetic data when demonstrating the project.
+- Administrative routes enforce role-based access.
+- Database credentials and secret keys must not be committed to GitHub.
+- Synthetic data should be used for demonstrations.
 
-## Future Improvements
+## 🚀 Deployment
 
-- Automated unit and integration tests.
+The application is deployed using:
+
+- **Application Hosting:** Render
+- **Database Hosting:** Neon PostgreSQL
+- **Application Server:** Gunicorn
+
+**Live URL:** [https://employee-management-system-mjfz.onrender.com](https://employee-management-system-mjfz.onrender.com)
+
+## 🔮 Future Improvements
+
+- Automated unit and integration testing.
 - GitHub Actions CI/CD pipeline.
-- Admin management interface.
 - Password reset functionality.
 - Enhanced dashboard analytics.
-- Application deployment to a cloud platform.
+- Improved employee notifications.
+- Additional reporting and analytics features.
 
-## Author
+## 👨‍💻 Author
 
 **Kishan Patel**
 
-GitHub: https://github.com/kishanpatel7538
+- GitHub: [kishanpatel7538](https://github.com/kishanpatel7538)
 
-## License
+## 📄 License
 
-No license has been specified yet. Standard copyright restrictions apply.
+No open-source license has been specified for this repository. Standard copyright restrictions apply.
