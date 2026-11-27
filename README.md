@@ -1,3 +1,6 @@
+## 🔗 Project Links
+[Open Live Application](https://employee-management-system-mjfz.onrender.com)
+
 # Employee Management System (HRMS)
 
 A Flask-based Employee Management System with role-based access for administrators and employees. It uses PostgreSQL for persistent storage and Docker Compose to run the web application and database.
