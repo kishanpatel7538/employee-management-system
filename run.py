@@ -1,23 +1,23 @@
+
 import os
 
 from app import create_app, db
-from app.models import User, Employee
+import app.models
 
 app = create_app()
 
+# Initialize database tables
+with app.app_context():
+    try:
+        db.create_all()
+        print("Database connected successfully!")
+        print("All application tables initialized!")
+    except Exception as e:
+        print(f"Database initialization error: {e}")
+        raise
+
+
 if __name__ == "__main__":
-
-    with app.app_context():
-
-        try:
-            db.create_all()
-
-            print("Database connected successfully!")
-            print("Users and Employees tables created!")
-
-        except Exception as e:
-            print("Database error:", e)
-
     app.run(
         host="0.0.0.0",
         port=5000,
